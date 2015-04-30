@@ -1,7 +1,8 @@
 require "colorize"
 
 class Board
-  attr_accessor :removed_pieces, :grid, :cursor, :start_cursor, :messages
+  attr_accessor :removed_pieces, :grid, :cursor, :start_cursor,
+                :error_messages, :status_message, :turn_message
 
   def initialize(seed = false)
     @grid = Array.new(8) { Array.new(8) }
@@ -9,8 +10,7 @@ class Board
     initialize_pieces if seed
     @cursor = [6,3]
     @start_cursor = nil
-    @messages = []
-
+    @error_messages, @status_message = [], []
   end
 
   def [](pos)
@@ -24,11 +24,9 @@ class Board
   def deep_dup
     new_board = Board.new
 
-    grid.each do |row|
-      row.compact.each do |piece|
+    pieces.each do |piece|
         new_piece = piece.deeper_dup(new_board)
         new_board[new_piece.pos] = new_piece
-      end
     end
 
     new_board
@@ -36,7 +34,7 @@ class Board
 
   def checkmate?(color)
     return false if !in_check?(color)
-    grid.flatten.compact.all? do |piece|
+    pieces.all? do |piece|
       if piece.color == color
         piece.valid_moves.empty?
       else
@@ -46,9 +44,9 @@ class Board
   end
 
   def stalemate?(color)
-    return true if grid.flatten.compact.size == 2 #if only 2 pieces (kings)
+    return true if pieces.size == 2 #if only 2 pieces (kings)
 
-    grid.flatten.compact.all? do |piece|
+    pieces.all? do |piece|
       if piece.color == color
         piece.valid_moves.empty?
       else
@@ -107,7 +105,7 @@ class Board
 
 
   def in_check?(color)
-    grid.flatten.compact.each do |piece|
+    pieces.each do |piece|
       if piece.color != color
         return true if piece.moves.include?(king_position(color))
       end
@@ -133,18 +131,19 @@ class Board
     puts; print_grid; puts
     removed_pieces[:black].each {|piece| print piece}
     puts
-    @messages.each { |message| puts message }
-    @messages = [@messages[0]]
+    puts status_message if status_message
+    puts turn_message if turn_message
+    error_messages.each {|message| puts message} if error_messages
   end
 
   def pawn_to_queen_check
     pawn = nil
 
-    @grid.flatten[0..7].each do |piece|
+    grid.flatten[0..7].each do |piece|
       pawn = piece if piece.is_a?(Pawn) && piece.color == :white
     end
 
-    @grid.flatten[-1..-8].each do |piece|
+    grid.flatten[-1..-8].each do |piece|
       pawn = piece if piece.is_a?(Pawn) && piece.color == :black
     end
     return if pawn.nil?
@@ -152,6 +151,10 @@ class Board
     pos = pawn.pos.dup
     self[pos] = nil
     self[pos] = Queen.new(pawn.color, pos, self)
+  end
+
+  def pieces
+    grid.flatten.compact
   end
 
   private
@@ -177,9 +180,9 @@ class Board
   end
 
   def background_color(rindex, cindex)
-    if @cursor == [rindex, cindex]
+    if cursor == [rindex, cindex]
       :white
-    elsif @start_cursor == [rindex, cindex]
+    elsif start_cursor == [rindex, cindex]
       :green
     end
   end

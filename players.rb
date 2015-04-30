@@ -7,7 +7,7 @@ class Player
   end
 
   def convert_color
-    color == :black ? "blue" : "red"
+    color == :black ? "Blue" : "Red"
   end
 end
 
