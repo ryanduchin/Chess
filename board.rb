@@ -46,6 +46,8 @@ class Board
   end
 
   def stalemate?(color)
+    return true if @grid.flatten.compact.size == 2 #if only 2 pieces (kings)
+
     @grid.flatten.compact.all? do |piece|
       if piece.color == color
         piece.valid_moves.empty?

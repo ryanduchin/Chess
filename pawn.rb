@@ -9,32 +9,38 @@ class Pawn < Piece
 
     one_forward = pos_in_front(@pos)
     two_forward = pos_in_front(one_forward)
-    unless @board.occupied?(one_forward)
+    if pawn_can_move(one_forward)
       moves << one_forward
-      unless @board.occupied?(two_forward) || @moved
-        moves << two_forward
-      end
+      moves << two_forward if !@moved && pawn_can_move(two_forward)
     end
 
     capture_positions.each do |cap_pos|
-      if @board.occupied?(cap_pos) &&
-         @board.piece_at(cap_pos).color != self.color
-        moves << cap_pos
-      end
+      moves << cap_pos if pawn_can_attack(cap_pos)
     end
 
     moves
   end
+
 
   def symbol
     piece_symbol = "♟"
     piece_symbol.colorize(convert_color(@color))
   end
 
+  def pawn_can_move(pos)
+    @board.on_board?(pos) && !@board.occupied?(pos)
+  end
+
+  def pawn_can_attack(pos)
+    @board.on_board?(pos) &&
+    @board.occupied?(pos) &&
+    @board.piece_at(pos).color != self.color
+  end
+
   private
 
-  def pos_in_front(current_pos)
-    [current_pos.first + move_dir, current_pos.last]
+  def pos_in_front(ref_pos)
+    [ref_pos.first + move_dir, ref_pos.last]
   end
 
   def capture_positions

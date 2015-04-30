@@ -74,12 +74,11 @@ class Game
   end
 
   def computer_execute_move
+    #choose random piece, choose random move (Only this implemented)
     #Later: iterate through pieces, if any can check or checkmate, do
     #Later: iterate again, if any can take a piece, randomly do one of them
-    #choose random piece, choose random move (Only this implemented)
+    cursor_start = @board.cursor
 
-    #computer crashes if playing itself, not sure why
-    #possibly due to checking off-board potential moves?
     computer_pieces = @board.grid.flatten.compact.select do |piece|
       piece.color == @current_player.color
     end
@@ -87,22 +86,29 @@ class Game
       piece = computer_pieces.sample
       start_pos = piece.pos.dup
       end_pos = piece.valid_moves.sample
-      restore_cursor = @board.cursor
       if end_pos
-        sleep 0.05
-        @board.start_cursor = piece.pos
-        @board.render
-        sleep 0.04
-        @board.cursor = end_pos
-        @board.render
-        sleep 0.04
-        @board.start_cursor = nil
-        @board.cursor = restore_cursor
+        cursor_delay
         @board.move(start_pos, end_pos, @current_player.color)
-        @board.messages << "Computer moves #{piece.symbol} from #{convert_pos(start_pos)} to #{convert_pos(end_pos)}"
+
+        @board.messages << ("Computer moves #{piece.symbol} " +
+                            "from #{convert_pos(start_pos)} " +
+                            "to #{convert_pos(end_pos)}")
         return
       end
     end
+  end
+
+  def cursor_delay
+    x = 0.1
+    sleep x
+    @board.start_cursor = piece.pos
+    @board.render
+    sleep 2*x
+    @board.cursor = end_pos
+    @board.render
+    sleep 2*x
+    @board.start_cursor = nil
+    @board.cursor = restore_cursor
   end
 
   def convert_pos(pos)
@@ -147,6 +153,6 @@ class Game
 end
 
 
-g = Game.new(ComputerPlayer.new("Ryan"), ComputerPlayer.new("Hal"))
+g = Game.new(ComputerPlayer.new("Ryan"), ComputerPlayer.new("Steve"))
 # g = Game.new
 g.play
