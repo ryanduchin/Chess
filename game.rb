@@ -12,7 +12,7 @@ class Game
   attr_accessor :over_message
   attr_reader :current_player, :board
 
-  def initialize(player1 = HumanPlayer.new("Ryan"), player2 = HumanPlayer.new("Dan"))
+  def initialize(player1 = HumanPlayer.new("Dan"), player2 = HumanPlayer.new("Ryan"))
     @player1, @player2 = player1, player2
     @player1.color = :white
     @player2.color = :black
@@ -159,6 +159,7 @@ class Game
 end
 
 
-g = Game.new(ComputerPlayer.new("Ryan"), ComputerPlayer.new("Steve"))
+g = Game.new(ComputerPlayer.new("Ryan"), ComputerPlayer.new("Hal"))
+# g = Game.new(ComputerPlayer.new("Hal"))
 # g = Game.new
 g.play
