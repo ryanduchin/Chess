@@ -1,0 +1,62 @@
+# Chess
+
+```
+class Piece
+  def symbol
+    raise NotImplementedError.new
+  end
+end
+```
++ Board
+  + on_board?
+  + occupied?(pos)
+  + piece_at(pos)
+  + checkmate?
+  + check?
+  + `#deep_dup`
++ Piece
+    + @color
+    + @pos
+    + @moved
+    + @board
+    + #valid_moves()
+ + Pawn (weird)
+ + SlidingPiece
+   + #moves()
+   + Rook
+     + #move_dirs()
+     + #symbol "R"
+   + Bishop
+   + Queen
+ + SteppingPiece
+   + #move_diffs()
+   + King
+   + Knight
+
++ Player
++ Game
+
+---
+
+## `Piece`
++ pos
++ board
++ color
++ moves()
+
+## `SlidingPiece`
++ move_dirs()
+## `SteppingPiece`
++ move_diffs()
+
+---
+
+## Approach
+
+1. Board
+2. Piece moving
+3. Pawn (simple Game class)
+4. in_check?(color)
+5. update piece to have valid_moves = moves - moves_into_check (HINT:
+dup board)
+6. check_mate?(color)
