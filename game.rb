@@ -74,31 +74,41 @@ class Game
   end
 
   def computer_execute_move
-    #iterate through pieces, if any can check or checkmate, do
-    #iterate again, if any can take a piece, randomly do one of them
+    #Later: iterate through pieces, if any can check or checkmate, do
+    #Later: iterate again, if any can take a piece, randomly do one of them
     #choose random piece, choose random move (Only this implemented)
+
+    #computer crashes if playing itself, not sure why
+    #possibly due to checking off-board potential moves?
     computer_pieces = @board.grid.flatten.compact.select do |piece|
       piece.color == @current_player.color
     end
     loop do
       piece = computer_pieces.sample
-      move = piece.valid_moves.sample
-      if move
-        sleep 0.2
-        temp_pos = @board.cursor
+      start_pos = piece.pos.dup
+      end_pos = piece.valid_moves.sample
+      restore_cursor = @board.cursor
+      if end_pos
+        sleep 0.05
         @board.start_cursor = piece.pos
         @board.render
-        sleep 0.2
-        @board.cursor = move
+        sleep 0.04
+        @board.cursor = end_pos
         @board.render
-        sleep 0.2
+        sleep 0.04
         @board.start_cursor = nil
-        @board.cursor = temp_pos
-        @board.move(piece.pos, move, @current_player.color)
-        @board.messages << "Computer moves #{piece.symbol} from #{piece.pos} to #{move}"
+        @board.cursor = restore_cursor
+        @board.move(start_pos, end_pos, @current_player.color)
+        @board.messages << "Computer moves #{piece.symbol} from #{convert_pos(start_pos)} to #{convert_pos(end_pos)}"
         return
       end
     end
+  end
+
+  def convert_pos(pos)
+    row = (8 - pos.first).to_s
+    col = ('a'..'h').to_a[pos.last]
+    row + col
   end
 
   def other_player
