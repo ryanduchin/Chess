@@ -9,6 +9,8 @@ require_relative 'players.rb'
 require 'colorize'
 
 class Game
+  attr_accessor :over_message
+  attr_reader :current_player, :board
 
   def initialize(player1 = HumanPlayer.new("Ryan"), player2 = HumanPlayer.new("Dan"))
     @player1, @player2 = player1, player2
@@ -20,22 +22,23 @@ class Game
   end
 
   def play
-    @board.render
+    board.render
     until over?
 
-      if @board.in_check?(@current_player.color)
+      if board.in_check?(current_player.color)
         puts "You are in check!!!".red
       end
 
-      if @current_player.is_a?(HumanPlayer)
+      if current_player.is_a?(HumanPlayer)
         execute_move
       else
         computer_execute_move
       end
+      @board.pawn_to_queen_check
       @current_player = other_player
     end
 
-    @board.render
+    board.render
     puts "#{@over_message}! #{other_player.name} wins!"
   end
 
@@ -43,9 +46,9 @@ class Game
   private
 
   def display_player
-    name = @current_player.name
-    color = @current_player.convert_color
-    @board.messages[0] = "#{name} (#{color}): enter move"
+    name = current_player.name
+    color = current_player.convert_color
+    board.messages[0] = "#{name} (#{color}): enter move"
   end
 
   def execute_move
@@ -53,23 +56,23 @@ class Game
       display_player
 
       move_start = cursor_input.dup
-      @board.valid_start?(move_start, @current_player.color)
-      @board.start_cursor = @board.cursor.dup
+      board.valid_start?(move_start, current_player.color)
+      board.start_cursor = board.cursor.dup
 
       move_end = cursor_input.dup
-      @board.start_cursor = nil
-      @board.move(move_start, move_end, @current_player.color)
+      board.start_cursor = nil
+      board.move(move_start, move_end, current_player.color)
 
     rescue InvalidMoveError => e
-      @board.messages << e.message
+      board.messages << e.message
       retry
     rescue InputError => e
-      @board.messages << e.message
+      board.messages << e.message
       retry
     rescue NotImplementedError => e
-      @board.messages << e.message
+      board.messages << e.message
     rescue MissingPieceError => e
-      @board.messages << e.message
+      board.messages << e.message
     end
   end
 
@@ -77,20 +80,24 @@ class Game
     #choose random piece, choose random move (Only this implemented)
     #Later: iterate through pieces, if any can check or checkmate, do
     #Later: iterate again, if any can take a piece, randomly do one of them
+
     cursor_start = @board.cursor
 
     computer_pieces = @board.grid.flatten.compact.select do |piece|
-      piece.color == @current_player.color
+      piece.color == current_player.color
     end
     loop do
       piece = computer_pieces.sample
       start_pos = piece.pos.dup
       end_pos = piece.valid_moves.sample
       if end_pos
-        cursor_delay
-        @board.move(start_pos, end_pos, @current_player.color)
+        cursor_delay(start_pos, end_pos)
+        @board.cursor = cursor_start
 
-        @board.messages << ("Computer moves #{piece.symbol} " +
+        @board.move(start_pos, end_pos, current_player.color)
+
+        @board.messages << ("#{current_player.name} " +
+                            "moves #{piece.symbol} " +
                             "from #{convert_pos(start_pos)} " +
                             "to #{convert_pos(end_pos)}")
         return
@@ -98,17 +105,16 @@ class Game
     end
   end
 
-  def cursor_delay
-    x = 0.1
+  def cursor_delay(start_pos, end_pos)
+    x = 0.001
     sleep x
-    @board.start_cursor = piece.pos
+    @board.start_cursor = start_pos
     @board.render
     sleep 2*x
     @board.cursor = end_pos
     @board.render
     sleep 2*x
     @board.start_cursor = nil
-    @board.cursor = restore_cursor
   end
 
   def convert_pos(pos)
@@ -118,15 +124,15 @@ class Game
   end
 
   def other_player
-    @current_player == @player1 ? @player2 : @player1
+    current_player == @player1 ? @player2 : @player1
   end
 
   def over?
-    if @board.checkmate?(@current_player.color)
+    if @board.checkmate?(current_player.color)
       @over_message = "Checkmate"
       true
     elsif
-      @board.stalemate?(@current_player.color)
+      @board.stalemate?(current_player.color)
       @over_message = "Stalemate"
       true
     end

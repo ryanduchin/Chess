@@ -5,10 +5,10 @@ class SteppingPiece < Piece
     move_diffs.each do |dir|
       new_pos = [pos.first + dir.first, pos.last + dir.last]
 
-      next if !@board.on_board?(new_pos)
+      next if !board.on_board?(new_pos)
 
-      next if @board.occupied?(new_pos) &&
-              @board.piece_at(new_pos).color == self.color
+      next if board.occupied?(new_pos) &&
+              board.piece_at(new_pos).color == self.color
       moves << new_pos
     end
 
@@ -24,7 +24,7 @@ class King < SteppingPiece
 
   def symbol
     piece_symbol = "♚"
-    piece_symbol.colorize(convert_color(@color))
+    piece_symbol.colorize(convert_color(color))
   end
 end
 
@@ -35,6 +35,6 @@ class Knight < SteppingPiece
 
   def symbol
     piece_symbol = "♞"
-    piece_symbol.colorize(convert_color(@color))
+    piece_symbol.colorize(convert_color(color))
   end
 end

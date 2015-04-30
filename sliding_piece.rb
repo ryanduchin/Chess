@@ -18,9 +18,9 @@ class SlidingPiece < Piece
       x, y = pos
       new_pos = [x + dx * steps, y + dy * steps]
 
-      if !@board.on_board?(new_pos)
+      if !board.on_board?(new_pos)
         return moves_in_direction
-      elsif !@board.piece_at(new_pos)
+      elsif !board.piece_at(new_pos)
         moves_in_direction << new_pos
       elsif same_color?(new_pos)
         return moves_in_direction
@@ -33,7 +33,7 @@ class SlidingPiece < Piece
   end
 
   def same_color?(new_pos)
-     @board.piece_at(new_pos).color == color
+     board.piece_at(new_pos).color == color
   end
 
 end
@@ -46,7 +46,7 @@ class Rook < SlidingPiece
 
   def symbol
     piece_symbol = "♜"
-    piece_symbol.colorize(convert_color(@color))
+    piece_symbol.colorize(convert_color(color))
   end
 end
 
@@ -59,7 +59,7 @@ class Bishop < SlidingPiece
 
   def symbol
     piece_symbol = "♝"
-    piece_symbol.colorize(convert_color(@color))
+    piece_symbol.colorize(convert_color(color))
   end
 end
 
@@ -71,6 +71,6 @@ class Queen < SlidingPiece
 
   def symbol
     piece_symbol = "♛"
-    piece_symbol.colorize(convert_color(@color))
+    piece_symbol.colorize(convert_color(color))
   end
 end

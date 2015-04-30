@@ -24,7 +24,7 @@ class Board
   def deep_dup
     new_board = Board.new
 
-    @grid.each do |row|
+    grid.each do |row|
       row.compact.each do |piece|
         new_piece = piece.deeper_dup(new_board)
         new_board[new_piece.pos] = new_piece
@@ -36,7 +36,7 @@ class Board
 
   def checkmate?(color)
     return false if !in_check?(color)
-    @grid.flatten.compact.all? do |piece|
+    grid.flatten.compact.all? do |piece|
       if piece.color == color
         piece.valid_moves.empty?
       else
@@ -46,9 +46,9 @@ class Board
   end
 
   def stalemate?(color)
-    return true if @grid.flatten.compact.size == 2 #if only 2 pieces (kings)
+    return true if grid.flatten.compact.size == 2 #if only 2 pieces (kings)
 
-    @grid.flatten.compact.all? do |piece|
+    grid.flatten.compact.all? do |piece|
       if piece.color == color
         piece.valid_moves.empty?
       else
@@ -107,7 +107,7 @@ class Board
 
 
   def in_check?(color)
-    @grid.flatten.compact.each do |piece|
+    grid.flatten.compact.each do |piece|
       if piece.color != color
         return true if piece.moves.include?(king_position(color))
       end
@@ -117,7 +117,7 @@ class Board
   end
 
   def king_position(color)
-    @grid.flatten.each do |piece|
+    grid.flatten.each do |piece|
       if piece.is_a?(King) && piece.color == color
         return piece.pos
       end
@@ -137,12 +137,29 @@ class Board
     @messages = [@messages[0]]
   end
 
+  def pawn_to_queen_check
+    pawn = nil
+
+    @grid.flatten[0..7].each do |piece|
+      pawn = piece if piece.is_a?(Pawn) && piece.color == :white
+    end
+
+    @grid.flatten[-1..-8].each do |piece|
+      pawn = piece if piece.is_a?(Pawn) && piece.color == :black
+    end
+    return if pawn.nil?
+
+    pos = pawn.pos.dup
+    self[pos] = nil
+    self[pos] = Queen.new(pawn.color, pos, self)
+  end
+
   private
 
   def print_grid
     square_color = :black
 
-    @grid.each_with_index do |row, rindex|
+    grid.each_with_index do |row, rindex|
       print "#{8-rindex}: "
       row.each_with_index do |piece, cindex|
         item = piece ? piece.symbol : " "

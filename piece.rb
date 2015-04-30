@@ -11,17 +11,17 @@ class Piece
   end
 
   def convert_color(color)
-    color == :black ? :magenta : :red
+    color == :black ? :light_blue : :red
   end
 
   def deeper_dup(new_board)
-    self.class.new(@color, @pos.dup, new_board, @moved)
+    self.class.new(color, pos.dup, new_board, moved)
   end
 
   def move_into_check?(end_pos)
-    dup_board = @board.deep_dup
-    dup_board.move!(@pos, end_pos, color)
-    dup_board.in_check?(@color)
+    dup_board = board.deep_dup
+    dup_board.move!(pos, end_pos, color)
+    dup_board.in_check?(color)
   end
 
   def valid_moves
